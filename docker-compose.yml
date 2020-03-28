@@ -1,0 +1,45 @@
+version: '3.4'
+services:
+  db:
+    image: mariadb
+    container_name: 'mariadb'
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'dbrootpass'
+      MOODLE_DATABASE: 'moodle'
+      MOODLE_USER: 'moodleuser'
+      MOODLE_DB_PASSWORD: 'moodlepass'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - /tmp/moodledb:/var/lib/mysql
+
+  moodleserver:
+    depends_on:
+      - db
+    build: .
+    container_name: 'moodleserver'
+    restart: 'always'
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      MOODLE_DB_HOST: db:3306
+      MYSQL_ROOT_PASSWORD: 'dbrootpass'
+      MOODLE_DATABASE: 'moodle'
+      MOODLE_USER: 'moodleuser'
+      MOODLE_DB_PASSWORD: 'moodlepass'
+    volumes:
+      - ${PWD}:/var/www/html
+      - /tmp/moodledata:/var/www/moodledata 
+    command:
+      - bash
+      - -c
+      - |
+        set -e
+        echo 'running prestart script'
+        /docker-init.sh
+        echo 'initialization done, starting apache'
+        exec /usr/sbin/apache2ctl -D FOREGROUND
