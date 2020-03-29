@@ -14,7 +14,7 @@ services:
     expose:
       - '3306'
     volumes:
-      - /tmp/moodledb:/var/lib/mysql
+      - moodledb:/var/lib/mysql
 
   moodleserver:
     depends_on:
@@ -33,7 +33,7 @@ services:
       MOODLE_DB_PASSWORD: 'moodlepass'
     volumes:
       - ${PWD}:/var/www/html
-      - /tmp/moodledata:/var/www/moodledata 
+      - moodledata:/var/www/moodledata 
     command:
       - bash
       - -c
@@ -43,3 +43,19 @@ services:
         /docker-init.sh
         echo 'initialization done, starting apache'
         exec /usr/sbin/apache2ctl -D FOREGROUND
+
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    container_name: 'phpmyadmin'
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - '8080:80'
+
+volumes:
+  moodledb:
+  moodledata:
