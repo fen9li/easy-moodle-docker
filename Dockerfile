@@ -1,6 +1,5 @@
 FROM php:7.3-apache
 
-
 # Install extension
 RUN apt-get update && \
     apt-get install -y libzip-dev zip && \
